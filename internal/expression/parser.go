@@ -3,16 +3,17 @@ package expression
 import "fmt"
 
 type operatorInfo struct {
-	priority int
+	priority    int
+	isLeftAssoc bool
 }
 
 var operators = map[string]operatorInfo{
-	"+": {priority: 1},
-	"-": {priority: 1},
-	"*": {priority: 2},
-	"/": {priority: 2},
+	"+": {priority: 1, isLeftAssoc: true},
+	"-": {priority: 1, isLeftAssoc: true},
+	"*": {priority: 2, isLeftAssoc: true},
+	"/": {priority: 2, isLeftAssoc: true},
 	// унарный минус
-	"#": {priority: 3},
+	"#": {priority: 3, isLeftAssoc: false},
 }
 
 // ----- функции для работы со стеком
@@ -57,21 +58,16 @@ func preprocessUnaryMinus(tokens []Token) ([]Token, error) {
 			//}
 
 			nextToken := tokens[index+1]
-			if nextToken.TokenType == LeftParen {
-				outputTokens = append(outputTokens,
-					Token{
-						TokenType: LeftParen,
-						Value:     "(",
-					},
-					Token{
-						TokenType: Number,
-						Value:     "0",
-					},
-				)
-			}
 
 			if nextToken.TokenType != Number {
-				outputTokens = append(outputTokens, token)
+				if nextToken.TokenType == LeftParen {
+					outputTokens = append(outputTokens, Token{
+						TokenType: UnaryOperator,
+						Value:     "#",
+					})
+				} else {
+					outputTokens = append(outputTokens, token)
+				}
 				continue
 			}
 
@@ -85,6 +81,15 @@ func preprocessUnaryMinus(tokens []Token) ([]Token, error) {
 			}
 
 			previousToken := tokens[index-1]
+			if previousToken.TokenType != Number && nextToken.TokenType == LeftParen {
+				outputTokens = append(outputTokens,
+					Token{
+						TokenType: UnaryOperator,
+						Value:     "#",
+					},
+				)
+				continue
+			}
 
 			if previousToken.TokenType == LeftParen {
 				outputTokens = append(outputTokens, Token{
@@ -106,12 +111,12 @@ func preprocessUnaryMinus(tokens []Token) ([]Token, error) {
 			outputTokens = append(outputTokens, token)
 		default:
 			outputTokens = append(outputTokens, token)
-			if token.TokenType == RightParen {
-				outputTokens = append(outputTokens, Token{
-					TokenType: RightParen,
-					Value:     ")",
-				})
-			}
+			//if token.TokenType == RightParen {
+			//	outputTokens = append(outputTokens, Token{
+			//		TokenType: RightParen,
+			//		Value:     ")",
+			//	})
+			//}
 		}
 	}
 	// обhаботать синтаксическую ошибку если есть унарный минус
@@ -166,7 +171,7 @@ func validSyntax(tokens []Token) error {
 
 			if previousToken.TokenType != Number && previousToken.TokenType != RightParen {
 				return fmt.Errorf("[syntax error]: перед бинарным оператор `%s` должно быть число", token.Value)
-			} else if nextToken.TokenType != Number && previousToken.TokenType != LeftParen {
+			} else if nextToken.TokenType != Number && nextToken.TokenType != LeftParen && nextToken.TokenType != UnaryOperator {
 				return fmt.Errorf("[syntax error]: после бинарного оператора `%s` должно быть число", token.Value)
 			}
 		}
@@ -181,7 +186,7 @@ func Parser(tokens []Token) ([]Token, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("preprocessUnaryMinus = %+v\n", tokens)
+	//fmt.Printf("preprocessUnaryMinus = %+v\n", tokens)
 
 	// проверка синтаксиса на ошибки перед применением алгоритма
 	if err = validSyntax(tokens); err != nil {
@@ -198,18 +203,20 @@ func Parser(tokens []Token) ([]Token, error) {
 		case Number:
 			output = append(output, token)
 
-		case Operator:
+		case Operator, UnaryOperator:
 			// проверяем что стек не пустой, что-то в нем есть на вершине
 			// 2 + 2 * 2
 			// 2 * 2 + 2
 			// 10 * 20 / 5 + 3
 			// A + B * C / D - E
-			for len(operatorStack) > 0 && peek(operatorStack).TokenType == Operator {
+			for len(operatorStack) > 0 && (peek(operatorStack).TokenType == Operator || peek(operatorStack).TokenType == UnaryOperator) {
 				topOperator = peek(operatorStack)
-				topOperatorPriority := operators[topOperator.Value].priority
-				tokenPriority := operators[token.Value].priority
+				topOperatorInfo := operators[topOperator.Value]
+				tokenOperatorInfo := operators[token.Value]
 
-				if tokenPriority <= topOperatorPriority {
+				if (tokenOperatorInfo.isLeftAssoc &&
+					tokenOperatorInfo.priority <= topOperatorInfo.priority) ||
+					(!tokenOperatorInfo.isLeftAssoc && tokenOperatorInfo.priority < topOperatorInfo.priority) {
 					// убираем верхний элемент в output
 					topOperator, operatorStack = pop(operatorStack)
 					output = append(output, topOperator)

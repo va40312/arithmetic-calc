@@ -153,7 +153,11 @@ func TestParser(t *testing.T) {
 			name:        "Тестирование минуса с унарным минусом",
 			expr:        "2 - -5",
 			expectError: false,
-			expectedRPN: nil,
+			expectedRPN: []Token{
+				{TokenType: Number, Value: "2"},
+				{TokenType: Number, Value: "-5"},
+				{TokenType: Operator, Value: "-"},
+			},
 		},
 		{
 			name:        "Тестирование синтаксической ошибки с 1 оператором",
@@ -161,35 +165,110 @@ func TestParser(t *testing.T) {
 			expectError: true,
 			expectedRPN: nil,
 		},
+		// число первое в скобочках
+		// 1) -(
+		// 2) (-( - перед минусом скобочка
+		// 3) 5 * -(
+		// 3 2 + # 5 + # # 1 9 + # * 6 +
 		{
 			name:        "Тестирование сложного вложенного минуса со скобками",
-			expr:        "- (-2 -2 - (-2 - ( 3 + 2) )) + 1",
-			expectError: true,
-			expectedRPN: nil,
+			expr:        "- ( - ( - ( 3 + 2) + 5 )) * - ( 1 + 9) + 6",
+			expectError: false,
+			expectedRPN: []Token{
+				{TokenType: Number, Value: "3"},
+				{TokenType: Number, Value: "2"},
+				{TokenType: Operator, Value: "+"},
+				{TokenType: UnaryOperator, Value: "#"},
+				{TokenType: Number, Value: "5"},
+				{TokenType: Operator, Value: "+"},
+				{TokenType: UnaryOperator, Value: "#"},
+				{TokenType: UnaryOperator, Value: "#"},
+				{TokenType: Number, Value: "1"},
+				{TokenType: Number, Value: "9"},
+				{TokenType: Operator, Value: "+"},
+				{TokenType: UnaryOperator, Value: "#"},
+				{TokenType: Operator, Value: "*"},
+				{TokenType: Number, Value: "6"},
+				{TokenType: Operator, Value: "+"},
+			},
 		},
 		{
 			name:        "Тестирование унарного минуса со скобками",
 			expr:        "-(-2 -2 )",
 			expectError: false,
 			expectedRPN: []Token{
-				{TokenType: Number, Value: "0"},
 				{TokenType: Number, Value: "-2"},
 				{TokenType: Number, Value: "2"},
-				{TokenType: Operator, Value: "-"}, // Это внутренний минус
-				{TokenType: Operator, Value: "-"}, // Это внешний минус
+				{TokenType: Operator, Value: "-"},      // Это внутрений минус
+				{TokenType: UnaryOperator, Value: "#"}, // Это внешний минус
+			},
+		},
+		{
+			name:        "Унарный минус в скобках",
+			expr:        "5 * (-2)",
+			expectError: false,
+			expectedRPN: []Token{
+				{TokenType: Number, Value: "5"},
+				{TokenType: Number, Value: "-2"},
+				{TokenType: Operator, Value: "*"},
+			},
+		},
+		{
+			name:        "Унарный минус в скобках",
+			expr:        "5 * -2",
+			expectError: false,
+			expectedRPN: []Token{
+				{TokenType: Number, Value: "5"},
+				{TokenType: Number, Value: "-2"},
+				{TokenType: Operator, Value: "*"},
+			},
+		},
+		{
+			name:        "Унарный минус в скобках с минусом перед оператором",
+			expr:        "5 * -(-2)",
+			expectError: false,
+			expectedRPN: []Token{
+				{TokenType: Number, Value: "5"},
+				{TokenType: Number, Value: "-2"},
+				{TokenType: UnaryOperator, Value: "#"},
+				{TokenType: Operator, Value: "*"},
+			},
+		},
+		{
+			name:        "Проверка обычных чисел со скобками",
+			expr:        "(5) + (-2)",
+			expectError: false,
+			expectedRPN: []Token{
+				{TokenType: Number, Value: "5"},
+				{TokenType: Number, Value: "-2"},
+				{TokenType: Operator, Value: "+"},
 			},
 		},
 		{
 			name:        "Тестирование унарного минуса со скобками и другим оператором перед ним",
 			expr:        "3 * -(-2 -2 )",
 			expectError: false,
-			expectedRPN: nil,
+			expectedRPN: []Token{
+				{TokenType: Number, Value: "3"},
+				{TokenType: Number, Value: "-2"},
+				{TokenType: Number, Value: "2"},
+				{TokenType: Operator, Value: "-"},
+				{TokenType: UnaryOperator, Value: "#"},
+				{TokenType: Operator, Value: "*"},
+			},
 		},
 		{
 			name:        "Тестирование синтаксической ошибки с незакрытыми скобками",
-			expr:        "-(-3 -2 ) - 1",
+			expr:        "-(-3.41 -2.432 ) - 1.003",
 			expectError: false,
-			expectedRPN: nil,
+			expectedRPN: []Token{
+				{TokenType: Number, Value: "-3.41"},
+				{TokenType: Number, Value: "2.432"},
+				{TokenType: Operator, Value: "-"},
+				{TokenType: UnaryOperator, Value: "#"},
+				{TokenType: Number, Value: "1.003"},
+				{TokenType: Operator, Value: "-"},
+			},
 		},
 		{
 			name:        "Тестирование синтаксической ошибки с незакрытыми скобками",

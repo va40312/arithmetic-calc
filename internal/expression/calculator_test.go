@@ -5,30 +5,62 @@ import "testing"
 func TestCalculator(t *testing.T) {
 	testCases := []struct {
 		name        string
-		text        string
-		expected    float64
+		expression  string
+		expectedVal float64
 		expectError bool
 	}{
 		{
-			name:        "Самый простой случай",
-			text:        "2 + 2",
-			expected:    4.0,
+			name:        "Базовый пример с приоритетом",
+			expression:  "3 + 2 * 2",
 			expectError: false,
+			expectedVal: 7.0,
+		},
+		{
+			name:        "Сложное выражение с унарными минусами и скобками",
+			expression:  "5 * -(-2 - 2)",
+			expectError: false,
+			expectedVal: 20.0, // 5 * -(-4) = 5 * 4 = 20
+		},
+		{
+			name:        "Полный хардкор-тест",
+			expression:  "- ( - ( - ( 3 + 2) + 5 )) * - ( 1 + 9) + 6",
+			expectError: false,
+			expectedVal: 6.0,
+		},
+		{
+			name:        "Деление на ноль",
+			expression:  "100 / (5 - 5)",
+			expectError: true,
+		},
+		{
+			name:        "Лексическая ошибка (недопустимый символ)",
+			expression:  "2 + & 3",
+			expectError: true,
+		},
+		{
+			name:        "Синтаксическая ошибка (два оператора)",
+			expression:  "2 ++ 3",
+			expectError: true,
+		},
+		{
+			name:        "Синтаксическая ошибка (пропущен оператор)",
+			expression:  " (2) (3)",
+			expectError: true,
 		},
 	}
 
 	for _, test := range testCases {
 		t.Run(test.name, func(t *testing.T) {
-			actual, err := Calculate(test.text)
+			actual, err := Calculate(test.expression)
 
 			if !test.expectError && err != nil {
-				t.Errorf("not expected error (%s) in Calculate(%s) = %f, expected %f", err, test.text, actual, test.expected)
+				t.Errorf("not expected error (%s) in Calculate(%s) = %f, expected %f", err, test.expression, actual, test.expectedVal)
 			} else if test.expectError && err == nil {
-				t.Errorf("expected error, but not get it in Calculate(%s) = %f, expected %f", test.text, actual, test.expected)
+				t.Errorf("expected error, but not get it in Calculate(%s) = %f, expected %f", test.expression, actual, test.expectedVal)
 			}
 
-			if actual != test.expected {
-				t.Errorf("Calculate(%s) = %f, expected %f", test.text, actual, test.expected)
+			if actual != test.expectedVal {
+				t.Errorf("Calculate(%s) = %f, expected %f", test.expression, actual, test.expectedVal)
 			}
 		})
 	}

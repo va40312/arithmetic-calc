@@ -41,7 +41,7 @@ var condidateRegex = regexp.MustCompile(`(?:(?:\-\s*)?[0-9\(])[\d\s\.\+\-\*\/()]
 */
 
 // очищаем от 123 или -123 и прочему мусора
-var hasOperatorRegex = regexp.MustCompile(`[\+\*\/\-]\s*[^\d\(\-]`)
+var hasOperatorRegex = regexp.MustCompile(`[\+\*\/\-]`)
 
 // для дальнейшей проверки нужно чтобы если перед или после 1 оператора не идет число то отбрасываем
 
@@ -70,6 +70,7 @@ func Finder(text string) []FoundExpression {
 		// Вы не можете изменить символ в уже созданной строке.
 		// Если вы хотите "изменить" строку, вы на самом деле создаете совершенно новую строку в памяти.
 		condidate := text[indexes[0]:indexes[1]]
+		//fmt.Printf("condidate: %s\n", condidate)
 
 		// !!!!!!!!!!!!!!!!!!!!!!!!!!
 		// ошибка метод indexes[0] и indexes[1] возвращают байтовую длину

@@ -19,6 +19,7 @@ const (
 	Operator
 	LeftParen
 	RightParen
+	UnaryOperator
 )
 
 type Token struct {
