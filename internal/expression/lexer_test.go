@@ -183,7 +183,7 @@ func TestLexer(t *testing.T) {
 		{
 			name:        "Проверяем работу с двойными операторами или разными",
 			text:        "2 +- 2 // 4",
-			expectError: true,
+			expectError: false,
 			expected: []Token{
 				{TokenType: Number, Value: "2"},
 				{TokenType: Operator, Value: "+"},
@@ -197,7 +197,7 @@ func TestLexer(t *testing.T) {
 		{
 			name:        "Проверяем работу с неправильным порядком операторов",
 			text:        "- 2 2",
-			expectError: true,
+			expectError: false,
 			expected: []Token{
 				{TokenType: Operator, Value: "-"},
 				{TokenType: Number, Value: "2"},

@@ -41,7 +41,12 @@ var condidateRegex = regexp.MustCompile(`(?:(?:\-\s*)?[0-9\(])[\d\s\.\+\-\*\/()]
 */
 
 // очищаем от 123 или -123 и прочему мусора
-var hasOperatorRegex = regexp.MustCompile(`[\+\*\/\-]`)
+// [\+\*\/\-]\s*[^\d\(\-] - старый regex
+var hasOperatorRegex = regexp.MustCompile(`[\+\*\/]|\s\-`)
+
+// ^\-?\s*\d+(?:\.\d+)?\s*$ - старый на проверку числа
+// проверка на пробел между числами
+var hasNumberSpaceNumberRegex = regexp.MustCompile(`\d\s+\d`)
 
 // для дальнейшей проверки нужно чтобы если перед или после 1 оператора не идет число то отбрасываем
 
@@ -93,6 +98,10 @@ func Finder(text string) []FoundExpression {
 		// Операция s[i] обращается к i-тому байту. Если ты напишешь s := "Привет"; fmt.Println(string(s)), ты получишь не букву П, а "кракозябру", потому что ты вывел только первый из двух байт, которые составляют эту букву.
 		// Движок regexp в Go, как и сама строка в Go, работает на уровне байт. Он не знает о "символах" или "буквах" в человеческом понимании. Он видит строку как последовательность байт.
 		// символы (руны). Руны это и есть один символ русский или другой в нашем представлении, но в памяти 2 байта
+
+		if hasNumberSpaceNumberRegex.MatchString(condidate) {
+			continue
+		}
 
 		if hasOperatorRegex.MatchString(condidate) {
 			results = append(results, FoundExpression{
