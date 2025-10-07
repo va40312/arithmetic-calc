@@ -49,8 +49,10 @@ func TestCalculator(t *testing.T) {
 		},
 	}
 
-	for _, test := range testCases {
+	for _, tc := range testCases {
+		test := tc
 		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
 			actual, err := Calculate(test.expression)
 
 			if !test.expectError && err != nil {

@@ -154,8 +154,10 @@ func TestEvaluator(t *testing.T) {
 		},
 	}
 
-	for _, test := range testCases {
+	for _, tc := range testCases {
+		test := tc
 		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
 			actual, err := Evaluate(test.rpn)
 
 			if err != nil && !test.expectError {

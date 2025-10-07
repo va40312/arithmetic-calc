@@ -206,8 +206,10 @@ func TestLexer(t *testing.T) {
 		},
 	}
 
-	for _, test := range testCases {
+	for _, tc := range testCases {
+		test := tc
 		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
 			actual, err := Lexer(test.text)
 
 			if err != nil && !test.expectError {

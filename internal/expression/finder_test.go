@@ -114,7 +114,8 @@ func TestFinder_SingleSimpleExpression(t *testing.T) {
 		},
 	}
 
-	for _, test := range testCases {
+	for _, tc := range testCases {
+		test := tc
 		t.Run(test.name, func(t *testing.T) {
 			var expected []FoundExpression
 			for _, expression := range test.expected {
