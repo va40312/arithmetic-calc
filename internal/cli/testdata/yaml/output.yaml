@@ -1,0 +1,19 @@
+report01:
+    0.1+0.2: Тест на валидность кличей формата
+    conclusion: Спасибо за внимание!!!!
+    date: 'Дата: 07.10.2025'
+    date-range: 'Срок реализации: 01.01.2025 - 07.10.2025'
+    description: Проверка первой версии для TXT!
+    is_actual: true
+    report01-01customer: Отчет выполнен по заказу компании 1-99 .com
+    sales: 'Продано: 15.43 единиц за 6 дней.'
+    sub_reports:
+        - name: Под-отчет 1
+          value: 'Значение: 10'
+        - name: Под-отчет 2
+          value: 'Значение: 100'
+    title: Отчёт по продажам
+reportSource:
+    sales: sales department
+reporterName: Alex
+reporterWorkingHours: 20

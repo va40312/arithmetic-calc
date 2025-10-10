@@ -1,0 +1,19 @@
+reporterName: Alex
+reporterWorkingHours: 20
+reportSource:
+  sales: sales department
+report01:
+  description: "Проверка первой версии для TXT!"
+  title: Отчёт по продажам
+  sales: "Продано: 15.43 единиц за 6 дней."
+  date: "Дата: 07.10.2025"
+  date-range: "Срок реализации: 01.01.2025 - 07.10.2025"
+  report01-01customer: "Отчет выполнен по заказу компании 1-99 .com"
+  conclusion: Спасибо за внимание!!!!
+  0.1+0.2: Тест на валидность кличей формата
+  is_actual: true
+  sub_reports:
+    - name: "Под-отчет 1"
+      value: "Значение: 10"
+    - name: "Под-отчет 2"
+      value: "Значение: 100"

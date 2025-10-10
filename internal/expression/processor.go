@@ -22,7 +22,10 @@ func ProcessString(text string) (string, error) {
 	for _, found := range foundExpressions {
 		result, err := Calculate(found.Expression)
 		if err != nil {
-			return "", fmt.Errorf("обнаружено невалидное выражение '%s': %w", found.Expression, err)
+			//пропускаем ошибки чтобы идти дальше
+			// главное обработать валидные не валидные нужно оставить как есть
+			continue
+			//return "", fmt.Errorf("обнаружено невалидное выражение '%s': %w", found.Expression, err)
 		}
 		// замена выражения в строке
 		// можем делать так как как итерация по найдем выражениям, а не строке
